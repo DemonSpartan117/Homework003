@@ -20,7 +20,7 @@ class LinearHashTable {
 
 	static const int w = 32;
 	static const int r = 8;
-	array<T> t;
+	array<T> t; //THIS IS THE BACKING ARRAY
 	int n;   // number of values in T
 	int q;   // number of non-null entries in T
 	int d;   // t.length = 2^d

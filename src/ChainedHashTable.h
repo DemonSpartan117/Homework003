@@ -9,6 +9,9 @@
 #define CHAINEDHASHTABLE_H_
 #include <climits>
 #include "DLList.h"
+#include "utils.h"
+#include "array.h"
+#include "ArrayStack.h"
 
 namespace ods {
 
@@ -17,7 +20,7 @@ class ChainedHashTable {
 protected:
 	typedef DLList<T> List;
 	T null;
-	DLList<List> t;
+	array<List> backingArray; //THIS IS THE BACKING ARRAY
 	int n;  //total number of elements in structure
 	int dimension; //dimension
 	int randomNum; //random number
@@ -49,13 +52,13 @@ void ChainedHashTable<T>::resize() {
 	while (1<<dimension <= n) dimension++;
     n = 0;
 	DLList<List> newTable(1<<dimension);
-	for (int i = 0; i < t.length; i++) {
-		for (int j = 0; j < t[i].size(); j++) {
-			T x = t[i].get(j);
+	for (int i = 0; i < backingArray.length; i++) {
+		for (int j = 0; j < backingArray[i].size(); j++) {
+			T x = backingArray[i].get(j);
 			newTable[hash(x)].add(x);
 		}
 	}
-	t = newTable;
+	backingArray = newTable;
 }
 
 /*
@@ -71,7 +74,7 @@ ChainedHashTable<int>::ChainedHashTable() : t(2)
 
 
 template<class T>
-ChainedHashTable<T>::ChainedHashTable() : t(2) { //t(2) says we are starting with an array of size 2
+ChainedHashTable<T>::ChainedHashTable() : backingArray(2) { //t(2) says we are starting with an array of size 2
 	n = 0;
 	dimension = 1;
 	null = INT_MIN;
@@ -88,8 +91,8 @@ ChainedHashTable<T>::~ChainedHashTable() {
 template<class T>
 bool ChainedHashTable<T>::add(T x) {
 	if (find(x) != null) return false;
-	if (n+1 > t.length) resize();
-	t[hash(x)].add(x);
+	if (n+1 > backingArray.length) resize();
+	backingArray[hash(x)].add(x);
 	n++;
 	return true;
 }
@@ -98,10 +101,10 @@ bool ChainedHashTable<T>::add(T x) {
 template<class T>
 T ChainedHashTable<T>::remove(T x) {
 	int j = hash(x);
-	for (int i = 0; i < t[j].size(); i++) {
-		T y = t[j].get(i);
+	for (int i = 0; i < backingArray[j].size(); i++) {
+		T y = backingArray[j].get(i);
 		if (x == y) {
-			t[j].remove(i);
+			backingArray[j].remove(i);
 			n--;
 			return y;
 		}
@@ -113,9 +116,9 @@ T ChainedHashTable<T>::remove(T x) {
 template<class T>
 T ChainedHashTable<T>::find(T x) {
 	int j = hash(x);
-	for (int i = 0; i < t[j].size(); i++)
-		if (x == t[j].get(i))
-			return t[j].get(i);
+	for (int i = 0; i < backingArray[j].size(); i++)
+		if (x == backingArray[j].get(i))
+			return backingArray[j].get(i);
 	return null;
 }
 
@@ -125,7 +128,7 @@ void ChainedHashTable<T>::clear() {
 	n = 0;
 	dimension = 1;
 	DLList<List> b(2);
-	t = b;
+	backingArray = b;
 }
 
 } /* namespace ods */
