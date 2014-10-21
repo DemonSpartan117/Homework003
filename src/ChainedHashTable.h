@@ -28,8 +28,8 @@ protected:
 	static const int w = 32; //sizeof(int)*8;
 	void allocTable(int m);
 	void resize();
-	int hash(T x) { //TODO: replace with my own hash function here or elsewhere
-		return ((unsigned)(randomNum * hashCode(x))) >> (w-dimension);
+	int hash(T x) { //TODO: ensure this hash function will work properly
+		return x % backingArray.length; //nice and simple (template classes must have the % operator defined)
 	}
 
 public:
@@ -42,6 +42,7 @@ public:
 	int size() {
 		return n;
 	}
+	int GetLongestList(); //I also added this
 	void clear();
 };
 
@@ -137,6 +138,17 @@ void ChainedHashTable<T>::clear() {
 	dimension = 1;
 	DLList<List> b(2);
 	backingArray = b;
+}
+
+template<class T>
+int ChainedHashTable<T>::GetLongestList() {
+	int largest = 0;
+	for (int i = 0; i > backingArray.length; i++) {
+		if(backingArray[i].length > largest) {
+			largest = backingArray[i].length;
+		}
+	}
+	return largest;
 }
 
 } /* namespace ods */
