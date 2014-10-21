@@ -22,11 +22,12 @@ class LinearHashTable {
 	static const int r = 8;
 	array<T> t; //THIS IS THE BACKING ARRAY
 	int n;   // number of values in T
-	int q;   // number of non-null entries in T
+	int q;   // number of non-null entries in T (n + # of del)
 	int d;   // t.length = 2^d
 	T null, del;
 	void resize();
-	int hash(T x) {
+	int hash(T x) { //TODO: replace this with my own hash function
+		//this hash function will be the same as the hash function I make in ChainedHashTable
 		unsigned h = hashCode(x);
 		return (tab[0][h&0xff]
 				 ^ tab[1][(h>>8)&0xff]
@@ -45,7 +46,9 @@ class LinearHashTable {
 public:
 	// FIXME: get rid of default constructor
 	LinearHashTable();
-	LinearHashTable(T null, T del);
+	LinearHashTable(T null, T del); // this constructor allows you to set null and del to whatever you want that is of the template class
+	/*This is the constructor we want to use because it is the one that allows us to set the null and del variables
+	 * which will allow the program to properly run*/
 	virtual ~LinearHashTable();
 	bool add(T x);
 	bool addSlow(T x);
@@ -103,12 +106,12 @@ void LinearHashTable<T>::resize() {
 	while ((1<<d) < 3*n) d++;
 	array<T> tnew(1<<d, null);
 	q = n;
-	// insert everything into tnew
+	// insert everything into tnew and re-hashes everything
 	for (int k = 0; k < t.length; k++) {
 		if (t[k] != null && t[k] != del) {
 			int i = hash(t[k]);
 			while (tnew[i] != null)
-				i = (i == tnew.length-1) ? 0 : i + 1;
+				i = (i == tnew.length-1) ? 0 : i + 1; //increment i (but for the new (re-sized) hash table)
 			tnew[i] = t[k];
 		}
 	}
@@ -126,8 +129,8 @@ void LinearHashTable<T>::clear() {
 
 template<class T>
 bool LinearHashTable<T>::add(T x) {
-	if (find(x) != null) return false;
-	if (2*(q+1) > t.length) resize();   // max 50% occupancy
+	if (find(x) != null) return false; //(returning false because you already have the item you are trying to add)
+	if (2*(q+1) > t.length) resize();   // max 50% occupancy (because it will resize once it is half full)
 	int i = hash(x);
 	while (t[i] != null && t[i] != del)
 		i = (i == t.length-1) ? 0 : i + 1; // increment i
