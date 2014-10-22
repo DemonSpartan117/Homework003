@@ -13,6 +13,7 @@
 #include "array.h"
 #include "ArrayStack.h"
 
+using namespace std;
 namespace ods {
 
 template<class T>
@@ -51,6 +52,15 @@ public:
  */
 template<class T>
 void ChainedHashTable<T>::resize() {
+	/*the below code is for testing to see WHEN resize is called
+	 * and should not be considered part of the code. This is only
+	 * here to make the Test.cpp file work better and since this
+	 * assignment is about making the alterations to classes AND
+	 * testing them, I assume it is a good thing to do and leave in*/
+	cout << endl;
+	cout << "!!it is time to resize!!" << endl;
+	cout << endl;
+
 	dimension = 1;
 	while (1<<dimension <= n) dimension++;
 	array<List> newTable(1<<dimension);
@@ -86,7 +96,7 @@ ChainedHashTable<T>::ChainedHashTable() : backingArray(2) { //t(2) says we are s
 	dimension = 1;
 	loadFactor = 1; //initially the loadFactor will be set to 1
 	//TODO: the commented out code below does not work because INT_MIN does not exist
-	//null = INT_MIN;
+	null = INT_MIN;
 	randomNum = rand() | 1;     // is a random odd integer
 }
 
@@ -99,6 +109,13 @@ ChainedHashTable<T>::~ChainedHashTable() {
 
 template<class T>
 bool ChainedHashTable<T>::add(T x) {
+	/*the below code is used in unison with the other testing code
+	 * for the resize function. I needed to know when the resize
+	 * function is being called and after how many add functions so
+	 * I could know if everything is working properly*/
+	cout << "adding " << x <<endl;
+	cout << endl;
+
 	if (find(x) != null) return false;
 	if ((n+1) / loadFactor > backingArray.length) resize();
 	backingArray[hash(x)].add(x);
@@ -143,9 +160,9 @@ void ChainedHashTable<T>::clear() {
 template<class T>
 int ChainedHashTable<T>::GetLongestList() {
 	int largest = 0;
-	for (int i = 0; i > backingArray.length; i++) {
-		if(backingArray[i].length > largest) {
-			largest = backingArray[i].length;
+	for (int i = 0; i < backingArray.length; i++) {
+		if(backingArray[i].size() > largest) {
+			largest = backingArray[i].size();
 		}
 	}
 	return largest;
