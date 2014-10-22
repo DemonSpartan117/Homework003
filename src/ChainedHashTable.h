@@ -53,7 +53,7 @@ template<class T>
 void ChainedHashTable<T>::resize() {
 	dimension = 1;
 	while (1<<dimension <= n) dimension++;
-	DLList<List> newTable(1<<dimension);
+	array<List> newTable(1<<dimension);
 	for (int i = 0; i < backingArray.length; i++) {
 		for (int j = 0; j < backingArray[i].size(); j++) {
 			T x = backingArray[i].get(j);
