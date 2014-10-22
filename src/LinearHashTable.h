@@ -21,6 +21,7 @@ class LinearHashTable {
 	static const int w = 32;
 	static const int r = 8;
 	array<T> t; //THIS IS THE BACKING ARRAY
+	array<T> t2; //THIS IS THE SECOND BACKING ARRAY
 	int n;   // number of values in T
 	int q;   // number of non-null entries in T (n + # of del)
 	int d;   // t.length = 2^d
@@ -28,12 +29,14 @@ class LinearHashTable {
 	void resize();
 	int hash(T x) { //TODO: replace this with my own hash function
 		//this hash function will be the same as the hash function I make in ChainedHashTable
-		unsigned h = hashCode(x);
-		return (tab[0][h&0xff]
-				 ^ tab[1][(h>>8)&0xff]
-				 ^ tab[2][(h>>16)&0xff]
-				 ^ tab[3][(h>>24)&0xff])
-				>> (w-d);
+		return 1 + (x % (t.length - 1)); //this is double hash function
+	}
+	//the below function will determine where to put elements in the second backing array
+	int adjust(int num) {
+		if(num < t.length) {
+			return num;
+		}
+		return num - t.length;
 	}
 	// Sample code for the book only -- never use this
 	/*
@@ -57,7 +60,7 @@ public:
 	int size() { return n; }
 	void clear();
 	// FIXME: yuck
-	void setNull(T null) { this->null = null; t.fill(null); }
+	void setNull(T null) { this->null = null; t.fill(null), t2.fill(null); }
 	void setDel(T del) { this->del = del; }
 };
 
@@ -76,7 +79,7 @@ LinearHashTable<int>::LinearHashTable() : t(2, INT_MIN) {
  * FIXME: Dangerous - leaves null and del uninitialized
  */
 template<class T>
-LinearHashTable<T>::LinearHashTable() : t(2) {
+LinearHashTable<T>::LinearHashTable() : t(2), t2(2) {
 /*
 	this->null = null;
 	this->del = del;
@@ -88,7 +91,7 @@ LinearHashTable<T>::LinearHashTable() : t(2) {
 
 
 template<class T>
-LinearHashTable<T>::LinearHashTable(T null, T del) : t(2, null) {
+LinearHashTable<T>::LinearHashTable(T null, T del) : t(2, null), t2(2, null) {
 	this->null = null;
 	this->del = del;
 	n = 0;
@@ -102,20 +105,38 @@ LinearHashTable<T>::~LinearHashTable() {
 
 template<class T>
 void LinearHashTable<T>::resize() {
+	//TODO:need to adjust this method completly after making this with two backing arrays
+	// will also need to adjust the add, find, and most other functions
 	d = 1;
-	while ((1<<d) < 3*n) d++;
+	while ((1<<d) / 2 < 3*n) d++;
 	array<T> tnew(1<<d, null);
+	array<T> t2new(1<<d, null);
 	q = n;
+	T data;
 	// insert everything into tnew and re-hashes everything
-	for (int k = 0; k < t.length; k++) {
-		if (t[k] != null && t[k] != del) {
-			int i = hash(t[k]);
-			while (tnew[i] != null)
-				i = (i == tnew.length-1) ? 0 : i + 1; //increment i (but for the new (re-sized) hash table)
-			tnew[i] = t[k];
+	for (int k = 0; k < t.length + t2.length; k++) {
+		if(k < t.length) {
+			data = t[k];
 		}
-	}
+		else {
+			data = t2[k];
+		}
+		if (data != null && data != del) {
+			int temp = hash(data);
+			if(temp < t.length) {
+				while (tnew[temp] != null)
+					temp = (temp == tnew.length-1) ? 0 : temp + 1; //increment i (but for the new (re-sized) hash table)
+				tnew[temp] = data;
+			}
+			else {
+				while (t2new[temp] != null)
+									temp = (temp == t2new.length-1) ? 0 : temp + 1; //increment i (but for the new (re-sized) hash table)
+								t2new[temp] = data;
+			}
+		}
+	}// for loop looking through the first backing array
 	t = tnew;
+	t2 = t2new;
 }
 
 template<class T>
