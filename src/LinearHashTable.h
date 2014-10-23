@@ -26,7 +26,7 @@ class LinearHashTable {
 	int q;   // number of non-null entries in T (n + # of del)
 	int d;   // t.length = 2^d /2 = 2^(d-1)
 	T null, del;
-	void resize();
+	void resize();//check
 	int hash(T x) { /*TODO: change things so that the size of the backing arrays depends on d at all times
 	then the size of each backing array will be half of 2^d so that the total size of our hash
 	table will be 2^d*/
@@ -57,10 +57,10 @@ public:
 	/*This is the constructor we want to use because it is the one that allows us to set the null and del variables
 	 * which will allow the program to properly run*/
 	virtual ~LinearHashTable();
-	bool add(T x);
+	bool add(T x); //check
 	bool addSlow(T x);
 	T remove(T x);
-	T find(T x);
+	T find(T x); //check
 	int size() { return n; }
 	void clear();
 	// FIXME: yuck
@@ -225,17 +225,33 @@ T LinearHashTable<T>::find(T x) {
 
 template<class T> //TODO: edit this function to consider the two backing arrays
 T LinearHashTable<T>::remove(T x) {
-	int i = hash(x);
-	while (t[i] != null) {
-		T y = t[i];
-		if (y != del && x == y) {
-			t[i] = del;
-			n--;
-			if (8*n < t.length) resize(); // min 12.5% occupancy
-			return y;
+	int index = hash(x);
+	if(index < t.length) {
+		while (t[index] != null) {
+			T y = t[index];
+			if (y != del && x == y) {
+				t[index] = del;
+				n--;
+				if (8*n < t.length) resize(); // min 12.5% occupancy
+				return y;
+			}
+			index = (index == t.length-1) ? 0 : index + 1;  // increment i
 		}
-		i = (i == t.length-1) ? 0 : i + 1;  // increment i
+	}//if index is small enough
+	else {
+		index = adjust(index, t.length);
+		while (t2[index] != null) {
+					T y = t2[index];
+					if (y != del && x == y) {
+						t2[index] = del;
+						n--;
+						if (8*n < t2.length) resize(); // min 12.5% occupancy
+						return y;
+					}
+					index = (index == t2.length-1) ? 0 : index + 1;  // increment i
+				}
 	}
+
 	return null;
 }
 

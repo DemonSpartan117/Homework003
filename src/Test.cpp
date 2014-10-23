@@ -58,5 +58,19 @@ int main() {
 	linearList.add(69); //resize here too
 
 	cout << linearList.find(2) << endl; //find works well enough from this specific test
+	cout << linearList.find(6) << endl;
+	cout << linearList.find(12) << endl;
+	cout << linearList.find(23) << endl;
+	cout << linearList.find(69) << endl;
+	cout << linearList.find(10) << endl << endl;
+
+	cout <<linearList.remove(2) <<endl;		//2
+	cout <<linearList.remove(2) <<endl;		//null (-1)
+	cout <<linearList.remove(6) <<endl;		//6
+	cout <<linearList.remove(69) <<endl;	//69
+	cout <<linearList.remove(100) <<endl;	//null (-1)
+	//more wonderful working tests. I love me
+
+	linearList.addSlow(3); //not gana work yet
 	return 0;
 }
