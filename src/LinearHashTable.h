@@ -107,7 +107,7 @@ LinearHashTable<T>::~LinearHashTable() {
 }
 
 template<class T>
-void LinearHashTable<T>::resize() {
+void LinearHashTable<T>::resize() { //FIXME: I am pretty sure the problem lies here somewhere
 	//FIXME:need to adjust this method if it does not work
 	// will also need to adjust the add, find, and most other functions
 	cout << endl << endl << "!!Resizing!!" << endl << endl;

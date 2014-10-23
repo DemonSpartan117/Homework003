@@ -52,10 +52,10 @@ int main() {
 	cout << "ready and start the second round of tests" << endl << endl;
 	LinearHashTable<int> linearList (-1, -20);
 	linearList.add(2);
-	linearList.add(6);
+	linearList.add(6); //resize here
 	linearList.add(12);
 	linearList.add(23);
-	linearList.add(69);
+	linearList.add(69); //resize here too
 
 	cout << linearList.find(2) << endl; //find works well enough from this specific test
 	return 0;
