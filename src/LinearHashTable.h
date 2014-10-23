@@ -30,16 +30,17 @@ class LinearHashTable {
 	int hash(T x) { /*TODO: change things so that the size of the backing arrays depends on d at all times
 	then the size of each backing array will be half of 2^d so that the total size of our hash
 	table will be 2^d*/
+		int tester = (unsigned) 1 + (x % ((1 << d) - 1));
 		return (unsigned) 1 + (x % ((1 << d) - 1)); //TODO: make this a double hash function
 	}
 
 	/*the below function will determine where to put elements in the second backing array
 	 * whenever something is hashed to the second backing array*/
-	int adjust(int num) {
-		if(num < t.length) {
+	int adjust(int num, int length) {
+		if(num < length) {
 			return num;
 		}
-		return num - t.length;
+		return num - length;
 	}
 	// Sample code for the book only -- never use this
 	/*
@@ -112,7 +113,7 @@ void LinearHashTable<T>::resize() { //FIXME: I am pretty sure the problem lies h
 	// will also need to adjust the add, find, and most other functions
 	cout << endl << endl << "!!Resizing!!" << endl << endl;
 	d = 1;
-	while ((1<<d) / 2 < 3*n) d++;
+	while ((1<<d) < 3*n) d++;
 	array<T> tnew((1<<d) / 2, null);
 	array<T> t2new((1<<d) / 2, null);
 	q = n;
@@ -120,28 +121,32 @@ void LinearHashTable<T>::resize() { //FIXME: I am pretty sure the problem lies h
 	int index = 0;
 	// insert everything into tnew and re-hashes everything
 	for (int k = 0; k < t.length + t2.length; k++) {
+
 		if(k < t.length) {
 			index = k;
 			data = t[index];
 		}
 		else {
-			index = adjust(k);
+			index = adjust(k, t.length);
 			data = t2[index];
 		}
+		//the above piece figures out what piece of data we are going to put in the new hash table
+
 		if (data != null && data != del) {
-			int temp = hash(data);
-			if(temp < t.length) {
-				while (tnew[temp] != null)
-					temp = (temp == tnew.length-1) ? 0 : temp + 1; //increment i (but for the new (re-sized) hash table)
-				tnew[temp] = data;
+			index = hash(data);
+			if(index <= tnew.length) {
+				while (tnew[index] != null)
+					index = (index == tnew.length-1) ? 0 : index + 1; //increment i (but for the new (re-sized) hash table)
+				tnew[index] = data;
 			}
 			else {
-				while (t2new[temp] != null)
-									temp = (temp == t2new.length-1) ? 0 : temp + 1; //increment i (but for the new (re-sized) hash table)
-								t2new[temp] = data;
+				index = adjust(index, tnew.length);
+				while (t2new[index] != null)
+					index = (index == t2new.length-1) ? 0 : index + 1; //increment i (but for the new (re-sized) hash table)
+								t2new[index] = data;
 			}
 		}
-	}// for loop looking through the first backing array
+	}
 	t = tnew;
 	t2 = t2new;
 }
@@ -166,7 +171,7 @@ bool LinearHashTable<T>::add(T x) {
 	int i = index;
 
 	if(i >= t.length) {
-		i = adjust(index);
+		i = adjust(index, t.length);
 		while (t2[i] != null && t2[i] != del)
 			i = (i == t2.length-1) ? 0 : i + 1; // increment i
 
@@ -193,7 +198,7 @@ T LinearHashTable<T>::find(T x) {
 	int index = hash(x);
 	int i = index;
 	if(i >= t.length) {
-		i = adjust(index);
+		i = adjust(index, t.length);
 		while (t2[i] != null) {
 
 			if (t2[i] != del && t2[i] == x) return t2[i];
