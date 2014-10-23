@@ -30,7 +30,7 @@ protected:
 	void allocTable(int m);
 	void resize();
 	int hash(T x) { //TODO: ensure this hash function will work properly
-		return x % backingArray.length; //nice and simple (template classes must have the % operator defined)
+		return (unsigned) 1 + ((x % ((1 << dimension)) - 1)); //nice and simple (template classes must have the % operator defined)
 	}
 
 public:

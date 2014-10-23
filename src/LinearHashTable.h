@@ -24,14 +24,17 @@ class LinearHashTable {
 	array<T> t2; //THIS IS THE SECOND BACKING ARRAY
 	int n;   // number of values in T
 	int q;   // number of non-null entries in T (n + # of del)
-	int d;   // t.length = 2^d
+	int d;   // t.length = 2^d /2 = 2^(d-1)
 	T null, del;
 	void resize();
-	int hash(T x) { //TODO: replace this with my own hash function
-		//this hash function will be the same as the hash function I make in ChainedHashTable
-		return 1 + (x % (t.length - 1)); //this is double hash function
+	int hash(T x) { /*TODO: change things so that the size of the backing arrays depends on d at all times
+	then the size of each backing array will be half of 2^d so that the total size of our hash
+	table will be 2^d*/
+		return (unsigned) 1 + (x % ((1 << d) - 1)); //TODO: make this a double hash function
 	}
-	//the below function will determine where to put elements in the second backing array
+
+	/*the below function will determine where to put elements in the second backing array
+	 * whenever something is hashed to the second backing array*/
 	int adjust(int num) {
 		if(num < t.length) {
 			return num;
@@ -79,7 +82,7 @@ LinearHashTable<int>::LinearHashTable() : t(2, INT_MIN) {
  * FIXME: Dangerous - leaves null and del uninitialized
  */
 template<class T>
-LinearHashTable<T>::LinearHashTable() : t(2), t2(2) {
+LinearHashTable<T>::LinearHashTable() : t(1), t2(1) {
 /*
 	this->null = null;
 	this->del = del;
@@ -91,7 +94,7 @@ LinearHashTable<T>::LinearHashTable() : t(2), t2(2) {
 
 
 template<class T>
-LinearHashTable<T>::LinearHashTable(T null, T del) : t(2, null), t2(2, null) {
+LinearHashTable<T>::LinearHashTable(T null, T del) : t(1, null), t2(1, null) {
 	this->null = null;
 	this->del = del;
 	n = 0;
@@ -105,21 +108,25 @@ LinearHashTable<T>::~LinearHashTable() {
 
 template<class T>
 void LinearHashTable<T>::resize() {
-	//TODO:need to adjust this method completly after making this with two backing arrays
+	//FIXME:need to adjust this method if it does not work
 	// will also need to adjust the add, find, and most other functions
+	cout << endl << endl << "!!Resizing!!" << endl << endl;
 	d = 1;
 	while ((1<<d) / 2 < 3*n) d++;
-	array<T> tnew(1<<d, null);
-	array<T> t2new(1<<d, null);
+	array<T> tnew((1<<d) / 2, null);
+	array<T> t2new((1<<d) / 2, null);
 	q = n;
 	T data;
+	int index = 0;
 	// insert everything into tnew and re-hashes everything
 	for (int k = 0; k < t.length + t2.length; k++) {
 		if(k < t.length) {
-			data = t[k];
+			index = k;
+			data = t[index];
 		}
 		else {
-			data = t2[k];
+			index = adjust(k);
+			data = t2[index];
 		}
 		if (data != null && data != del) {
 			int temp = hash(data);
@@ -148,30 +155,70 @@ void LinearHashTable<T>::clear() {
 	t = tnew;
 }
 
-template<class T>
+template<class T>	//TODO: edit this function to consider the two backing arrays
 bool LinearHashTable<T>::add(T x) {
+
 	if (find(x) != null) return false; //(returning false because you already have the item you are trying to add)
-	if (2*(q+1) > t.length) resize();   // max 50% occupancy (because it will resize once it is half full)
-	int i = hash(x);
-	while (t[i] != null && t[i] != del)
-		i = (i == t.length-1) ? 0 : i + 1; // increment i
-	if (t[i] == null) q++;
-	n++;
-	t[i] = x;
+
+	if (2*(q+1) > 1<<d) resize();   // max 50% occupancy (because it will resize once it is half full)
+
+	int index = hash(x);
+	int i = index;
+
+	if(i >= t.length) {
+		i = adjust(index);
+		while (t2[i] != null && t2[i] != del)
+			i = (i == t2.length-1) ? 0 : i + 1; // increment i
+
+		if (t2[i] == null) q++;
+
+		n++;
+		t2[i] = x;
+	}//if(i >= t.length)
+
+	else {
+		while (t[i] != null && t[i] != del)
+			i = (i == t.length-1) ? 0 : i + 1; // increment i
+
+		if (t[i] == null) q++;
+
+		n++;
+		t[i] = x;
+	}//else
 	return true;
 }
 
-template<class T>
+template<class T> //TODO: edit this function to consider the two backing arrays
 T LinearHashTable<T>::find(T x) {
-	int i = hash(x);
-	while (t[i] != null) {
-		if (t[i] != del && t[i] == x) return t[i];
-		i = (i == t.length-1) ? 0 : i + 1; // increment i
-	}
+	int index = hash(x);
+	int i = index;
+	if(i >= t.length) {
+		i = adjust(index);
+		while (t2[i] != null) {
+
+			if (t2[i] != del && t2[i] == x) return t2[i];
+
+			i = (i == t2.length-1) ? 0 : i + 1; // increment i
+			if(t.length -1 == 0) {
+				break;
+			}
+		}//while
+	} //if(i >= t.length)
+	else {
+		while (t[i] != null) {
+
+			if (t[i] != del && t[i] == x) return t[i];
+
+			i = (i == t.length-1) ? 0 : i + 1; // increment i unless it is too big
+			if(t.length -1 == 0) {
+							break;
+						}
+		}//while
+	}//else
 	return null;
 }
 
-template<class T>
+template<class T> //TODO: edit this function to consider the two backing arrays
 T LinearHashTable<T>::remove(T x) {
 	int i = hash(x);
 	while (t[i] != null) {

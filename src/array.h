@@ -40,7 +40,7 @@ public:
 	}
 
 	T& operator[](int i) {
-		assert(i >= 0 && i < length);
+		assert(i >= 0 && i < length); //so this is the out of bounds exception
 		return a[i];
 	}
 

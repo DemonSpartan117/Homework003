@@ -45,9 +45,18 @@ int main() {
 	list2.add(43);
 
 	cout << list2.GetLongestList() << endl;
-	//this concludes the tests for the ChainedHashTable.h file
+	cout << "this concludes the tests for the ChainedHashTable.h file" << endl << endl;
 	//TODO: when done with LinearHashTable, try to make a better hash function for both
 
+	cout << "now it is time to test the stuff for the LinearHashTable.h file" << endl;
+	cout << "ready and start the second round of tests" << endl << endl;
+	LinearHashTable<int> linearList (-1, -20);
+	linearList.add(2);
+	linearList.add(6);
+	linearList.add(12);
+	linearList.add(23);
+	linearList.add(69);
 
+	cout << linearList.find(2) << endl; //find works well enough from this specific test
 	return 0;
 }
