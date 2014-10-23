@@ -72,5 +72,10 @@ int main() {
 	//more wonderful working tests. I love me
 
 	linearList.addSlow(3); //not gana work yet
+	cout << linearList.find(3) << endl; //let us see if it did indeed add the 3
+	if(linearList.find(3) == 3) {
+		cout << "yay! It found 3 so the test worked and that is it. I am done..." << endl;
+		cout << "..." << endl << "..." << endl << "..." << endl << "bye";
+	}
 	return 0;
 }

@@ -58,8 +58,8 @@ public:
 	 * which will allow the program to properly run*/
 	virtual ~LinearHashTable();
 	bool add(T x); //check
-	bool addSlow(T x);
-	T remove(T x);
+	bool addSlow(T x); // check
+	T remove(T x); // check
 	T find(T x); //check
 	int size() { return n; }
 	void clear();
@@ -257,13 +257,25 @@ T LinearHashTable<T>::remove(T x) {
 
 template<class T>
 bool LinearHashTable<T>::addSlow(T x) {
-	if (2*(q+1) > t.length) resize();   // max 50% occupancy
-	int i = hash(x);
-	while (t[i] != null) {
-			if (t[i] != del && x.equals(t[i])) return false;
-			i = (i == t.length-1) ? 0 : i + 1; // increment i
+	if ((q+1) > t.length) resize();   // max 50% occupancy
+	int index = hash(x);
+	if(index < t.length) {
+		while (t[index] != null) {
+			if (t[index] != del && x == t[index]) return false;
+			index = (index == t.length-1) ? 0 : index + 1; // increment i
+		}
+		t[index] = x;
 	}
-	t[i] = x;
+
+	else {
+		index = adjust(index, t.length);
+		while (t2[index] != null) {
+					if (t2[index] != del && x == t[index]) return false;
+					index = (index == t2.length-1) ? 0 : index + 1; // increment i
+				}
+				t2[index] = x;
+	}
+
 	n++; q++;
 	return true;
 }
