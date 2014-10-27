@@ -13,6 +13,8 @@ using namespace std;
 #include "array.h"
 namespace ods {
 
+//a change here
+
 extern unsigned int tab[4][256];
 
 template<class T>
